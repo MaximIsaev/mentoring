@@ -19,54 +19,6 @@ public class DartWeider implements Serializable {
     private String favoriteMask;
     private String slogan = "Luuuuk, ya tvoy papka";
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getMaskColor() {
-        return maskColor;
-    }
-
-    public void setMaskColor(String maskColor) {
-        this.maskColor = maskColor;
-    }
-
-    public String getFavoriteSwordColor() {
-        return favoriteSwordColor;
-    }
-
-    public void setFavoriteSwordColor(String favoriteSwordColor) {
-        this.favoriteSwordColor = favoriteSwordColor;
-    }
-
-    public String getFavoriteMask() {
-        return favoriteMask;
-    }
-
-    public void setFavoriteMask(String favoriteMask) {
-        this.favoriteMask = favoriteMask;
-    }
-
-    public String getSlogan() {
-        return slogan;
-    }
-
-    public void setSlogan(String slogan) {
-        this.slogan = slogan;
-    }
-
-    public int getSwordLength() {
-        return swordLength;
-    }
-
-    public void setSwordLength(int swordLength) {
-        this.swordLength = swordLength;
-    }
-
     @Override
     public String toString() {
         return "DartWeider{" +

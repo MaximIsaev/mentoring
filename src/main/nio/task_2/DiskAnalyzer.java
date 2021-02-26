@@ -1,6 +1,8 @@
 package nio.task_2;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -32,7 +34,7 @@ public class DiskAnalyzer {
             do {
                 System.out.println("Enter a path: ");
                 path = scanner.next();
-                if(!isValid(path)) {
+                if (!isValid(path)) {
                     System.out.println("The path is not valid");
                 }
 
@@ -42,28 +44,34 @@ public class DiskAnalyzer {
             File file = Paths.get(path).toFile();
             switch (number) {
                 case 1:
-                    System.out.println("File with the maximum number of letters ‘s’ in the name: ");
-                    System.out.println(findFileWithMaxSLetters(file));
+                    String result = "File with the maximum number of letters ‘s’ in the name: " + findFileWithMaxSLetters(file);
+                    System.out.println(result);
+                    writeToFile("task_1.txt", result);
                     break;
                 case 2:
-
+                    StringBuilder result2 = new StringBuilder("Top-5 largest files: ");
                     List<File> files = getAllFiles(file).stream()
                             .sorted(Comparator.comparingLong(File::length).reversed())
                             .limit(5)
                             .collect(Collectors.toList());
-                    System.out.println("Top-5 largest files: ");
-                    files.forEach(f -> System.out.println(f.getName() + " - " + f.length() + " bytes"));
+                    files.forEach(f -> result2.append(f.getName()).append(" - ").append(f.length()).append(" bytes\n"));
+                    writeToFile("task_2.txt", result2.toString());
+                    System.out.println(result2);
                     break;
                 case 3:
-                    System.out.println("The average file size is: " +
+                    String result3 = "Average file size in the specified directory: " +
                             getAllFiles(file).stream()
                                     .mapToLong(File::length)
                                     .average()
                                     .orElse(Double.NaN)
-                            + " bytes");
+                            + " bytes";
+                    writeToFile("task_3.txt", result3);
+                    System.out.println(result3);
                     break;
                 case 4:
-                    printGroupFilesAndDirs(file);
+                    String result4 = printGroupFilesAndDirs(file);
+                    writeToFile("task_4.txt", result4);
+                    System.out.println(result4);
                     break;
             }
             System.out.print("\n\n\n");
@@ -122,7 +130,7 @@ public class DiskAnalyzer {
         return fileList;
     }
 
-    private static void printGroupFilesAndDirs(File dir) {
+    private static String printGroupFilesAndDirs(File dir) {
         List<File> files = getAllFiles(dir);
         Map<Character, Map<String, List<File>>> collect = files.stream()
                 .sorted(Comparator.comparing(File::getName))
@@ -134,10 +142,20 @@ public class DiskAnalyzer {
                     }
                 })));
 
+        StringBuilder str = new StringBuilder();
         for (Map.Entry<Character, Map<String, List<File>>> entry : collect.entrySet()) {
             int dirsAmount = entry.getValue().get("dirs") == null ? 0 : entry.getValue().get("dirs").size();
             int filesAmount = entry.getValue().get("files") == null ? 0 : entry.getValue().get("files").size();
-            System.out.println(entry.getKey() + ": dirs " + dirsAmount + ", files: " + filesAmount);
+            str.append(entry.getKey()).append(": dirs ").append(dirsAmount).append(", files: ").append(filesAmount).append("\n");
+        }
+        return str.toString();
+    }
+
+    private static void writeToFile(String fileName, String result) {
+        try (FileWriter fileWriter = new FileWriter(fileName)) {
+            fileWriter.write(result);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

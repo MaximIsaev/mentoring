@@ -1,0 +1,1 @@
+Average file size in the specified directory: 265602.24498087954 bytes

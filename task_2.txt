@@ -1,0 +1,5 @@
+Top-5 largest files: DaVinci_Resolve_16.2.8_Windows.exe - 1769599848 bytes
+cudnn_cnn_infer64_8.dll - 466526720 bytes
+Resolve.exe - 454833552 bytes
+cudnn_ops_infer64_8.dll - 240185856 bytes
+cublasLt64_11.dll - 167523328 bytes

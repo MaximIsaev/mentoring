@@ -1,0 +1,1 @@
+File with the maximum number of letters ‘s’ in the name: d:\Disc_C\Work\VTB\spms-ddb\build\classes\kotlin\test\ru\vtb\payments\suppliersCrm\suppliers\api\v1\SupplierControllerV1IT$testAssignManagerOkWhenUserIdParameterIsSpecifiedAndSupplierWithManagerAndManagersAreOnSameHierarchyLevelAndCurrentUserIsHeadToBothManagers$$inlined$fromJson$1.class

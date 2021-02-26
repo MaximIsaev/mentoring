@@ -19,17 +19,24 @@ public class DiskAnalyzer {
                             "3. The average file size in the specified directory or any its subdirectory.\n" +
                             "4. The number of files and folders, divided by the first letters of the alphabet (for example, 100,000 files and 200 folders begin with the letter A)."
             );
-            System.out.println("Your function number is: ");
-            int number = scanner.nextInt();
-            System.out.println("Your path is: ");
-            String path = scanner.next();
 
+            int number;
+            System.out.println("Enter a function number: ");
+            while (!scanner.hasNext("[1-4]")) {
+                System.out.println("No such function");
+                scanner.nextInt();
+            }
+            number = scanner.nextInt();
 
-            while (!isValid(path))
-                if (!isValid(path)) {
-                    System.out.println("No such path");
-                    break;
+            String path;
+            do {
+                System.out.println("Enter a path: ");
+                path = scanner.next();
+                if(!isValid(path)) {
+                    System.out.println("The path is not valid");
                 }
+
+            } while (!isValid(path));
 
             System.out.println("\n=================RESULT=================\n");
             File file = Paths.get(path).toFile();
@@ -58,13 +65,8 @@ public class DiskAnalyzer {
                 case 4:
                     printGroupFilesAndDirs(file);
                     break;
-                default:
-                    System.out.println("No such function");
-                    break;
             }
-            System.out.println();
-            System.out.println();
-            System.out.println();
+            System.out.print("\n\n\n");
         }
     }
 

@@ -19,43 +19,47 @@ public class DiskAnalyzer {
                             "3. The average file size in the specified directory or any its subdirectory.\n" +
                             "4. The number of files and folders, divided by the first letters of the alphabet (for example, 100,000 files and 200 folders begin with the letter A)."
             );
-            String number = scanner.nextLine();
-            String path = scanner.nextLine();
-            System.out.println("Your function number is: " + number);
-            System.out.println("Your path is: " + path);
-            System.out.println("=================RESULT=================");
+            System.out.println("Your function number is: ");
+            int number = scanner.nextInt();
+            System.out.println("Your path is: ");
+            String path = scanner.next();
+
 
             while (!isValid(path))
                 if (!isValid(path)) {
                     System.out.println("No such path");
                     break;
                 }
+
+            System.out.println("\n=================RESULT=================\n");
             File file = Paths.get(path).toFile();
             switch (number) {
-                case "1":
+                case 1:
+                    System.out.println("File with the maximum number of letters ‘s’ in the name: ");
                     System.out.println(findFileWithMaxSLetters(file));
                     break;
-                case "2":
-                    System.out.println(
+                case 2:
+
+                    List<File> files = getAllFiles(file).stream()
+                            .sorted(Comparator.comparingLong(File::length).reversed())
+                            .limit(5)
+                            .collect(Collectors.toList());
+                    System.out.println("Top-5 largest files: ");
+                    files.forEach(f -> System.out.println(f.getName() + " - " + f.length() + " bytes"));
+                    break;
+                case 3:
+                    System.out.println("The average file size is: " +
                             getAllFiles(file).stream()
-                                    .sorted(Comparator.comparingLong(File::length).reversed())
-                                    .limit(5)
-                                    .map(File::length)
-                                    .collect(Collectors.toList())
-                                    .toString()
-                    );
+                                    .mapToLong(File::length)
+                                    .average()
+                                    .orElse(Double.NaN)
+                            + " bytes");
                     break;
-                case "3":
-                    System.out.println(getAllFiles(file).stream()
-                            .mapToLong(File::length)
-                            .average()
-                            .orElse(Double.NaN));
-                    break;
-                case "4":
+                case 4:
                     printGroupFilesAndDirs(file);
                     break;
                 default:
-                    System.out.println("Choose the right function");
+                    System.out.println("No such function");
                     break;
             }
             System.out.println();
@@ -65,7 +69,7 @@ public class DiskAnalyzer {
     }
 
     private static Boolean isValid(String filePath) throws IllegalArgumentException {
-        return filePath != null && Files.exists(Paths.get(filePath));
+        return filePath != null && !filePath.trim().equals("") && Files.exists(Paths.get(filePath));
     }
 
     private static File findFileWithMaxSLetters(File path) {
@@ -86,7 +90,7 @@ public class DiskAnalyzer {
                     }
                     if (file.isDirectory()) {
                         File file1 = findFileWithMaxSLettersRecursively(file);
-                        if (countSOccurrence(file1.getName()) > countSOccurrence(maxFile.getName())) {
+                        if (file1 != null && countSOccurrence(file1.getName()) > countSOccurrence(maxFile.getName())) {
                             maxFile = file1;
                         }
                     }

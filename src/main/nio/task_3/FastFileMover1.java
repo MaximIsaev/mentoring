@@ -1,6 +1,8 @@
 package nio.task_3;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -15,27 +17,61 @@ public class FastFileMover1 {
         String from = args[0];
         String to = args[1];
 
+        Path file = Paths.get(from);
+        Path newDestination = Paths.get(to);
+        validatePath(file);
         Instant start = Instant.now();
 
-        simpleFileTransfer(from, to);
-//        bufferedFileTransfer(from, to);
+//        simpleFileTransfer(file, newDestination);
+//        bufferedFileTransfer(file, newDestination);
+        fileChannelFileTransfer(file, newDestination);
 
         Instant end = Instant.now();
         Duration duration = Duration.between(start, end);
         System.out.println("Coping file with 10GB size takes " + duration.getSeconds() + " second");
     }
 
-    private static void simpleFileTransfer(String from, String to) {
-        try {
-            Path oldFile = Paths.get(from);
-            Path newDestination = Paths.get(to);
-            if (!Files.exists(oldFile) || Files.isDirectory(oldFile)) {
-                System.out.println("File does not exist or a directory");
-                System.exit(0);
+    private static void validatePath(Path oldFile) {
+        if (!Files.exists(oldFile) || Files.isDirectory(oldFile)) {
+            System.out.println("File does not exist or a directory");
+            System.exit(0);
+        }
+    }
+
+    private static void fileChannelFileTransfer(Path file, Path newDestination) {
+
+        try (RandomAccessFile read = new RandomAccessFile(file.toFile(), "r");
+             RandomAccessFile write = new RandomAccessFile(getNewDestinationFullPath(file, newDestination), "rw");
+             FileChannel readChannel = read.getChannel();
+             FileChannel writeChannel = write.getChannel()
+        ) {
+            ByteBuffer buf = ByteBuffer.allocate(1024);
+            buf.clear();
+            while (readChannel.read(buf) > 0) {
+                buf.flip();
+                writeChannel.write(buf);
+                buf.clear();
             }
-            String newFileFullPath = newDestination.toAbsolutePath().toString() + File.separator + oldFile.toFile().getName();
-            Files.copy(oldFile, Files.createFile(Paths.get(newFileFullPath)), StandardCopyOption.REPLACE_EXISTING);
-            Files.deleteIfExists(oldFile);
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: ");
+            e.printStackTrace();
+            System.exit(0);
+        } catch (IOException e) {
+            System.out.println("Sorry, something went wrong");
+            e.printStackTrace();
+            System.exit(0);
+        }
+
+    }
+
+    private static void simpleFileTransfer(Path file, Path newDestination) {
+        try {
+            Files.copy(file,
+                    Files.createFile(Paths.get(getNewDestinationFullPath(file, newDestination))),
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+            Files.deleteIfExists(file);
         } catch (InvalidPathException e) {
             System.out.println("The path is incorrect");
             e.printStackTrace();
@@ -51,48 +87,26 @@ public class FastFileMover1 {
         }
     }
 
-    private static void bufferedFileTransfer(String from, String to) {
-        try {
-            Path oldFile = Paths.get(from);
-            Path newDestination = Paths.get(to);
-            if (!Files.exists(oldFile) || Files.isDirectory(oldFile)) {
-                System.out.println("File does not exist or a directory");
-                System.exit(0);
-            }
-            String newFileFullPath = newDestination.toAbsolutePath().toString() + File.separator + oldFile.toFile().getName();
+    private static void bufferedFileTransfer(Path file, Path newDestination) {
+        try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file.toFile()), 100000);
+             BufferedOutputStream bos = new BufferedOutputStream(
+                     new FileOutputStream(getNewDestinationFullPath(file, newDestination)), 100000)) {
 
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(oldFile.toFile()), 100000);
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(newFileFullPath), 100000);
             int read = bis.read();
             while (read != -1) {
                 char c = (char) read;
                 bos.write(c);
                 read = bis.read();
             }
-
-            bos.flush();
-
-            bos.close();
-            bis.close();
-
-//            File file = new File(newFileFullPath);
-//            file.createNewFile();
-
-
-//            Files.copy(oldFile, Files.createFile(Paths.get(newFileFullPath)), StandardCopyOption.REPLACE_EXISTING);
-//            Files.deleteIfExists(oldFile);
-        } catch (InvalidPathException e) {
-            System.out.println("The path is incorrect");
-            e.printStackTrace();
-            System.exit(0);
-        } catch (FileAlreadyExistsException e) {
-            System.out.println("The file is already existing");
-            e.printStackTrace();
-            System.exit(0);
+            Files.deleteIfExists(file);
         } catch (IOException e) {
             System.out.println("Sorry, something went wrong");
             e.printStackTrace();
             System.exit(0);
         }
+    }
+
+    private static String getNewDestinationFullPath(Path file, Path newDestination) {
+        return newDestination.toAbsolutePath().toString() + File.separator + file.toFile().getName();
     }
 }

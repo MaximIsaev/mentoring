@@ -3,6 +3,7 @@ package nio.task_3;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -20,15 +21,50 @@ public class FastFileMover1 {
         Path file = Paths.get(from);
         Path newDestination = Paths.get(to);
         validatePath(file);
-        Instant start = Instant.now();
 
-//        simpleFileTransfer(file, newDestination);
-//        bufferedFileTransfer(file, newDestination);
-        fileChannelFileTransfer(file, newDestination);
+        long totalNanos = 0;
+        int iterations = 1000;
+        String reportFileName = file.getFileName() + "_bufferedFileTransfer.txt";
+        for (int i = 0; i < iterations; i++) {
+            Instant start = Instant.now();
 
-        Instant end = Instant.now();
-        Duration duration = Duration.between(start, end);
-        System.out.println("Coping file with 10GB size takes " + duration.getSeconds() + " second");
+//            simpleFileTransfer(file, newDestination);
+        bufferedFileTransfer(file, newDestination);
+//        fileChannelFileTransfer(file, newDestination);
+
+            Instant end = Instant.now();
+            Duration duration = Duration.between(start, end);
+            String result;
+            result = "Iteration " + i + ": Coping file " + file + " to " + newDestination + " takes " + duration.getNano() / 1000000 + " ms\n";
+            System.out.print(result);
+            createReport(reportFileName, result);
+
+            String newDestinationFullPath = getNewDestinationFullPath(file, newDestination);
+            Path temp = file;
+            file = Paths.get(newDestinationFullPath);
+            newDestination = temp.getParent();
+
+            totalNanos += duration.getNano();
+
+        }
+
+        long avg = totalNanos / iterations;
+        createReport(reportFileName, "Average ms of " + iterations + " iterations for coping file: " + avg / 1000000 + " ms");
+
+
+    }
+
+    private static void createReport(String fileName, String report) {
+        try {
+            Path file = Paths.get(fileName);
+            if (Files.exists(file)) {
+                Files.write(file, report.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            } else {
+                Files.write(file, report.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void validatePath(Path oldFile) {

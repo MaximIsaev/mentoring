@@ -24,13 +24,13 @@ public class FastFileMover1 {
 
         long totalNanos = 0;
         int iterations = 1000;
-        String reportFileName = file.getFileName() + "_bufferedFileTransfer.txt";
+        String reportFileName = file.getFileName() + "_fileChannelFileTransfer.txt";
         for (int i = 0; i < iterations; i++) {
             Instant start = Instant.now();
 
 //            simpleFileTransfer(file, newDestination);
-        bufferedFileTransfer(file, newDestination);
-//        fileChannelFileTransfer(file, newDestination);
+//        bufferedFileTransfer(file, newDestination);
+        fileChannelFileTransfer(file, newDestination);
 
             Instant end = Instant.now();
             Duration duration = Duration.between(start, end);
@@ -134,11 +134,16 @@ public class FastFileMover1 {
                 bos.write(c);
                 read = bis.read();
             }
-            Files.deleteIfExists(file);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             System.out.println("Sorry, something went wrong");
             e.printStackTrace();
             System.exit(0);
+        }
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
